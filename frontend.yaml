@@ -15,6 +15,10 @@ spec:
       labels:
         app: frontend
         release: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8888"
+        prometheus.io/path: /actuator/prometheus
     spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -22,6 +26,33 @@ spec:
         - image: jkplayground/smartbank-frontend-module:nginx-v1.0.0
           name: sba-frontend
           resources: {}
+          env:
+            - name: ELASTIC_APM_SERVER_URL 
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ELASTIC_APM_SERVER_URL
+            - name: ELASTIC_APM_APPLICATION_PACKAGES 
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: ELASTIC_APM_APPLICATION_PACKAGES
+            - name: ELASTIC_APM_SERVICE_NAME 
+              value: "omega-front-scbcepb3u3"
+            - name: ELASTIC_APM_ENVIRONMENT 
+              value: prod
+            - name: ELASTIC_APM_LOG_LEVEL 
+              value: DEBUG 
+            - name: JAVA_TOOL_OPTIONS 
+              value: -javaagent:/elastic/apm/agent/elastic-apm-agent.jar
+            - name: management.endpoints.web.exposure.include
+              value: "*"
+            - name: management.server.port
+              value: "8888"
+            - name: management.metrics.web.server.request.autotime.enabled
+              value: "true"
+            - name: management.metrics.tags.application
+              value: omega-front-scbcepb3u3
           ports:
             - containerPort: 80
               name: nginx
@@ -29,10 +60,27 @@ spec:
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
+            - name: elastic-apm-agent
+              mountPath: /elastic/apm/agent
       volumes:
         - name: nginx-config
           configMap:
             name: ambassador-nginx-config
+        - name: elastic-apm-agent
+          emptyDir: {}
+      initContainers:
+        - name: elastic-java-agent
+          image: docker.elastic.co/observability/apm-agent-java:1.12.0
+          volumeMounts:
+            - mountPath: /elastic/apm/agent
+              name: elastic-apm-agent
+          command:
+            [
+              "cp",
+              "-v",
+              "/usr/agent/elastic-apm-agent.jar",
+              "/elastic/apm/agent",
+            ]
 
 ---
 apiVersion: v1
