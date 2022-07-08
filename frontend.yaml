@@ -4,7 +4,7 @@ metadata:
   labels:
     app: frontend
     release: v1
-  name: frontend-v1
+  name: frontend
 spec:
   replicas: 1
   selector:
