@@ -34,7 +34,7 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       containers:
-        - image: jkplayground/smartbank-api-module:v1.0.0
+        - image: hub.brainupgrade.net/junkin/sba-apiserver
           name: sba-apiserver
           resources: {}
           env:
@@ -51,17 +51,75 @@ spec:
                   name: db
                   key: password
             - name: spring.application.name
+              value: sba-apiserver
+            # usage ENV var
+            - name: cloud.aws.region.static
               valueFrom:
                 secretKeyRef:
-                  name: db
-                  key: password
+                  name: usage
+                  key: cloud_aws_region_static
+            - name: spring.profiles.active
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: spring_profiles_active
+            - name: cloud.aws.credentials.access-key
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_credentials_access_key
+            - name: cloud.aws.credentials.secret-key
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_credentials_secret_key
+            - name: cloud.aws.end-point.uri
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_endpoint_uri
+            - name: cloud.aws.end-point.uri-usage
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_endpoint_uri_usage
+            - name: spring.mail.username
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: spring_mail_username
+            - name: spring.mail.password
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: spring_mail_password
+            - name: from.mail.address
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: from_mail_address
+            - name: default.from.email.address
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: default_from_email_address
+            - name: default.to.email.address
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: default_to_email_address
           volumeMounts:
             - name: secret-vol
+              mountPath: "/etc/app"
+              readOnly: true
+            - name: usage-secret-vol
               mountPath: "/etc/app"
               readOnly: true
       volumes:
         - name: secret-vol
           secret:
             secretName: db
-
+        - name: usage-secret-vol
+          secret:
+            secretName: usage
 status: {}
