@@ -51,10 +51,7 @@ spec:
                   name: db
                   key: password
             - name: spring.application.name
-              valueFrom:
-                secretKeyRef:
-                  name: db
-                  key: password
+              value: sba-apiserver
           volumeMounts:
             - name: secret-vol
               mountPath: "/etc/app"
