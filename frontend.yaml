@@ -25,6 +25,7 @@ spec:
             matchLabels:
               app: frontend
       dnsPolicy: ClusterFirst
+      # pod auto healing
       restartPolicy: Always
       containers:
         - image: jkplayground/smartbank-frontend-module:nginx-v1.0.0

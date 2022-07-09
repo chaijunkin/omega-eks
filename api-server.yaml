@@ -33,20 +33,21 @@ spec:
     spec:
       # high availability (multi-az)
       topologySpreadConstraints:
-        - maxSkew: 1
+        - maxSkew: 1  # only 1 container for each zone
           topologyKey: topology.kubernetes.io/zone
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
               app: frontend
       dnsPolicy: ClusterFirst
+      # pod auto healing
       restartPolicy: Always
       containers:
         - image: jkplayground/smartbank-api-module:v1.0.0
           name: sba-apiserver
           resources: {}
           # high availability (TCP probe)
-          livenessProbe:
+          livenessProbe:  # stop route
             httpGet:
               path: /
               port: 8080
@@ -54,7 +55,7 @@ spec:
             periodSeconds: 5
             successThreshold: 1
             failureThreshold: 1
-          readinessProbe:
+          readinessProbe:  # detect abnormal status and report
             httpGet:
               path: /
               port: 8080
@@ -63,7 +64,7 @@ spec:
             periodSeconds: 1
             successThreshold: 1
             failureThreshold: 1
-          startupProbe:
+          startupProbe:  # kill container and subject to pod's restartPolicy
             httpGet:
               path: /
               port: 8080
@@ -85,10 +86,7 @@ spec:
                   name: db
                   key: password
             - name: spring.application.name
-              valueFrom:
-                secretKeyRef:
-                  name: db
-                  key: password
+              value: sba-apiserver
           volumeMounts:
             - name: secret-vol
               mountPath: "/etc/app"
