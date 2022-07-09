@@ -30,6 +30,7 @@ spec:
     metadata:
       labels:
         app: apiserver
+      # observability setup (metric)
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8888"
@@ -56,6 +57,7 @@ spec:
                   key: password
             - name: spring.application.name
               value: sba-apiserver
+            # observability setup (event log and distributed tracing for apm)
             - name: ELASTIC_APM_SERVER_URL 
               valueFrom:
                 configMapKeyRef:
@@ -74,6 +76,7 @@ spec:
               value: DEBUG 
             - name: JAVA_TOOL_OPTIONS 
               value: -javaagent:/elastic/apm/agent/elastic-apm-agent.jar
+            # observability setup (metric)
             - name: management.endpoints.web.exposure.include
               value: "*"
             - name: management.server.port
