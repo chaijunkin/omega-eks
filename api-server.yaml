@@ -56,6 +56,9 @@ spec:
             - name: secret-vol
               mountPath: "/etc/app"
               readOnly: true
+          initContainers:
+            # ensure installation of elastic agent before apiserver startup
+            - name: postgres
       volumes:
         - name: secret-vol
           secret:
