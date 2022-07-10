@@ -34,7 +34,7 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       containers:
-        - image: hub.brainupgrade.net/junkin/sba-dynamodb:3
+        - image: hub.brainupgrade.net/junkin/sba-dynamodb:usage
           name: sba-dynamodb
           resources: {}
           env:
