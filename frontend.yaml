@@ -37,6 +37,7 @@ spec:
             - until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver service; sleep 2; done
       containers:
         - image: hub.brainupgrade.net/junkin/sba-frontend:demo
+          imagePullPolicy: Always
           name: sba-frontend
           resources: {}
           ports:

@@ -41,6 +41,7 @@ spec:
               app: postgres
       containers:
         - image: postgres
+          imagePullPolicy: Always
           name: postgres
           env:
             # Persistent Volume Location

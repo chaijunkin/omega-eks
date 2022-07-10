@@ -35,6 +35,7 @@ spec:
       restartPolicy: Always
       containers:
         - image: hub.brainupgrade.net/junkin/sba-dynamodb:usage
+          imagePullPolicy: Always
           name: sba-dynamodb
           resources: {}
           env:
