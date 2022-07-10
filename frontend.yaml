@@ -19,19 +19,28 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       initContainers:
+        # wait for apiserver service up
         - name: init-apiserver-service
           image: busybox:1.28
           command:
             - sh
             - -c
-            - until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver; sleep 2; done
+            - until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver service; sleep 2; done
+        # wait for apiserver endpoint up
+        - name: init-apiserver-health
+          image: busybox:1.28
+          command:
+            - sh
+            - -c
+            - until ($(curl -sw '%{http_code}' "http://apiserver" -o /dev/null) -eq 200); do echo waiting for apiserver health; sleep 2; done
+        # wait for database service up
         - name: init-mydb-service
           image: busybox:1.28
           command:
             [
               "sh",
               "-c",
-              "until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver; sleep 2; done",
+              "until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for database service; sleep 2; done",
             ]
 
       containers:
