@@ -35,21 +35,6 @@ spec:
             - sh
             - -c
             - until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver service; sleep 2; done
-        # wait for apiserver endpoint up
-        - name: init-apiserver-health
-          image: busybox:1.28
-          command: ["/bin/sh","-c"]
-          args: ["while [ $(curl -sw '%{http_code}' http://apiserver) -ne 200 ]; do sleep 2; echo 'Waiting for the apiserver...'; done"]
-        # wait for database service up
-        - name: init-mydb-service
-          image: busybox:1.28
-          command:
-            [
-              "sh",
-              "-c",
-              "until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for database service; sleep 2; done",
-            ]
-
       containers:
         - image: jkplayground/smartbank-frontend-module:nginx-v1.0.0
           name: sba-frontend
@@ -91,7 +76,6 @@ spec:
         - name: nginx-config
           configMap:
             name: ambassador-nginx-config
-
 ---
 apiVersion: v1
 kind: ConfigMap
