@@ -57,8 +57,21 @@ spec:
               "-c",
               "until nslookup postgres.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for database service; sleep 2; done",
             ]
+        # ensure installation of elastic agent before apiserver startup
+        - name: elastic-java-agent
+          image: docker.elastic.co/observability/apm-agent-java:1.12.0
+          volumeMounts:
+            - mountPath: /elastic/apm/agent
+              name: elastic-apm-agent
+          command:
+            [
+              "cp",
+              "-v",
+              "/usr/agent/elastic-apm-agent.jar",
+              "/elastic/apm/agent",
+            ]
       containers:
-        - image: jkplayground/smartbank-api-module:v1.0.0
+        - image: hub.brainupgrade.net/junkin/sba-apiserver
           name: sba-apiserver
           resources: {}
           # high availability (TCP probe)
@@ -103,7 +116,7 @@ spec:
             - name: spring.application.name
               value: sba-apiserver
             # observability setup (event log and distributed tracing for apm)
-            - name: ELASTIC_APM_SERVER_URL 
+            - name: ELASTIC_APM_SERVER_URL
               valueFrom:
                 configMapKeyRef:
                   name: app-config
@@ -130,30 +143,78 @@ spec:
               value: "true"
             - name: management.metrics.tags.application
               value: apiserver-omega
+            # usage ENV var
+            - name: cloud.aws.region.static
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_region_static
+            - name: spring.profiles.active
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: spring_profiles_active
+            - name: cloud.aws.credentials.access-key
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_credentials_access_key
+            - name: cloud.aws.credentials.secret-key
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_credentials_secret_key
+            - name: cloud.aws.end-point.uri
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_endpoint_uri
+            - name: cloud.aws.end-point.uri-usage
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: cloud_aws_endpoint_uri_usage
+            - name: spring.mail.username
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: spring_mail_username
+            - name: spring.mail.password
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: spring_mail_password
+            - name: from.mail.address
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: from_mail_address
+            - name: default.from.email.address
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: default_from_email_address
+            - name: default.to.email.address
+              valueFrom:
+                secretKeyRef:
+                  name: usage
+                  key: default_to_email_address
           volumeMounts:
             - name: secret-vol
               mountPath: "/etc/app"
               readOnly: true
             - mountPath: /elastic/apm/agent 
-              name: elastic-apm-agent  
+              name: elastic-apm-agent
+            - name: usage-secret-vol
+              mountPath: "/etc/app"
+              readOnly: true
       volumes:
         - name: secret-vol
           secret:
             secretName: db
         - name: elastic-apm-agent
           emptyDir: {}
-      initContainers:
-        # ensure installation of elastic agent before apiserver startup
-        - name: elastic-java-agent
-          image: docker.elastic.co/observability/apm-agent-java:1.12.0
-          volumeMounts:
-            - mountPath: /elastic/apm/agent
-              name: elastic-apm-agent
-          command:
-            [
-              "cp",
-              "-v",
-              "/usr/agent/elastic-apm-agent.jar",
-              "/elastic/apm/agent",
-            ]
+        - name: usage-secret-vol
+          secret:
+            secretName: usage
 status: {}
