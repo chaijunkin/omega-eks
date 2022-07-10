@@ -30,7 +30,7 @@ spec:
         - name: init-apiserver-health
           image: busybox:1.28
           command: ["/bin/sh","-c"]
-          args: ["while [ $(curl -sw '%{http_code}' http://apiserver.svc.cluster.local -o /dev/null) -ne 200 ]; do sleep 2; echo 'Waiting for the apiserver...'; done"]
+          args: ["while [ $(curl -sw '%{http_code}' http://apiserver) -ne 200 ]; do sleep 2; echo 'Waiting for the apiserver...'; done"]
         # wait for database service up
         - name: init-mydb-service
           image: busybox:1.28
