@@ -29,10 +29,14 @@ spec:
         # wait for apiserver endpoint up
         - name: init-apiserver-health
           image: busybox:1.28
-          command:
-            - sh
+          args:
+            - /bin/sh
             - -c
-            - until ($(curl -sw '%{http_code}' "http://apiserver" -o /dev/null) -eq 200); do echo waiting for apiserver health; sleep 2; done
+            - >
+              set -x;
+              while [ $(curl -sw '%{http_code}' "http://apiserver" -o /dev/null) -ne 200 ]; do
+                sleep 2;
+              done
         # wait for database service up
         - name: init-mydb-service
           image: busybox:1.28
