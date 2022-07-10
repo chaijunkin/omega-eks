@@ -71,7 +71,7 @@ spec:
               "/elastic/apm/agent",
             ]
       containers:
-        - image: hub.brainupgrade.net/junkin/sba-apiserver:6
+        - image: hub.brainupgrade.net/junkin/sba-apiserver:demo
           name: sba-apiserver
           resources: {}
           # high availability (TCP probe)
