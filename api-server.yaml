@@ -71,7 +71,7 @@ spec:
               "/elastic/apm/agent",
             ]
       containers:
-        - image: hub.brainupgrade.net/junkin/sba-apiserver
+        - image: hub.brainupgrade.net/junkin/sba-apiserver:6
           name: sba-apiserver
           resources: {}
           # high availability (TCP probe)
@@ -205,16 +205,14 @@ spec:
               readOnly: true
             - mountPath: /elastic/apm/agent 
               name: elastic-apm-agent
-            - name: usage-secret-vol
-              mountPath: "/etc/app"
-              readOnly: true
       volumes:
         - name: secret-vol
-          secret:
-            secretName: db
+          projected:
+            sources:
+              - secret:
+                  name: db
+              - secret:
+                  name: usage
         - name: elastic-apm-agent
           emptyDir: {}
-        - name: usage-secret-vol
-          secret:
-            secretName: usage
 status: {}

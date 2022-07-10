@@ -36,7 +36,7 @@ spec:
             - -c
             - until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver service; sleep 2; done
       containers:
-        - image: jkplayground/smartbank-frontend-module:nginx-v1.0.0
+        - image: hub.brainupgrade.net/junkin/sba-frontend:6
           name: sba-frontend
           resources: {}
           ports:
