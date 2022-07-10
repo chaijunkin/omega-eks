@@ -96,10 +96,10 @@ spec:
             httpGet:
               path: /
               port: 8080
-            initialDelaySeconds: 30
+            initialDelaySeconds: 75
             periodSeconds: 10
             successThreshold: 1
-            failureThreshold: 2
+            failureThreshold: 5
           env:
             - name: spring.datasource.url
               value: jdbc:postgresql://postgres:5432/app
