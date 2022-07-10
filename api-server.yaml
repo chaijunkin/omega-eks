@@ -43,7 +43,7 @@ spec:
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
-              app: frontend
+              app: apiserver
       dnsPolicy: ClusterFirst
       # pod auto healing
       restartPolicy: Always
