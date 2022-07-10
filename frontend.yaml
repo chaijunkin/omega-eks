@@ -18,6 +18,22 @@ spec:
     spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
+      initContainers:
+        - name: init-apiserver-service
+          image: busybox:1.28
+          command:
+            - sh
+            - -c
+            - until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver; sleep 2; done
+        - name: init-mydb-service
+          image: busybox:1.28
+          command:
+            [
+              "sh",
+              "-c",
+              "until nslookup apiserver.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for apiserver; sleep 2; done",
+            ]
+
       containers:
         - image: jkplayground/smartbank-frontend-module:nginx-v1.0.0
           name: sba-frontend
