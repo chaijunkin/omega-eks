@@ -33,6 +33,16 @@ spec:
     spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
+      initContainers:
+        # wait for database service up
+        - name: init-postgres-service
+          image: busybox:1.28
+          command:
+            [
+              "sh",
+              "-c",
+              "until nslookup postgres.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for database service; sleep 2; done",
+            ]
       containers:
         - image: jkplayground/smartbank-api-module:v1.0.0
           name: sba-apiserver
