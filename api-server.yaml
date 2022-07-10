@@ -21,7 +21,7 @@ metadata:
     app: apiserver
   name: apiserver
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: apiserver
@@ -31,12 +31,47 @@ spec:
       labels:
         app: apiserver
     spec:
+      # high availability (multi-az)
+      topologySpreadConstraints:
+        - maxSkew: 1  # only 1 container for each zone
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: frontend
       dnsPolicy: ClusterFirst
+      # pod auto healing
       restartPolicy: Always
       containers:
         - image: jkplayground/smartbank-api-module:v1.0.0
           name: sba-apiserver
           resources: {}
+          # high availability (TCP probe)
+          livenessProbe:  # stop route
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 1
+          readinessProbe:  # detect abnormal status and report
+            httpGet:
+              path: /
+              port: 8080
+              httpHeaders:
+            initialDelaySeconds: 0
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 1
+          startupProbe:  # kill container and subject to pod's restartPolicy
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 2
           env:
             - name: spring.datasource.url
               value: jdbc:postgresql://postgres:5432/app
